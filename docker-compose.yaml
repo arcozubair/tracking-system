@@ -1,49 +1,47 @@
 version: '3.8'
 
 services:
-  backend:
+  time-backend:
     build: ./backend
     container_name: time-backend
-    ports:
-      - "5000:5000"
+    expose:
+      - "5000"
     environment:
-      - MONGO_URI=mongodb://mongo:27017/timetracking
+      - MONGO_URI=mongodb://time-mongo:27017/timetracking
       - NODE_ENV=production
     depends_on:
-      - mongo
+      - time-mongo
     volumes:
       - ./backend/public/uploads:/app/public/uploads
     networks:
-      - time-network
+      - farm_network
     restart: unless-stopped
 
-  frontend:
+  time-frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: time-frontend
-    ports:
-      - "5173:5173"
+    expose:
+      - "80"
     depends_on:
-      - backend
+      - time-backend
     networks:
-      - time-network
+      - farm_network
     restart: unless-stopped
 
-  mongo:
+  time-mongo:
     image: mongo:6
-    container_name: mongo
+    container_name: time-mongo
     restart: always
-    ports:
-      - "27017:27017"
     volumes:
-      - mongo_data:/data/db
+      - time_mongo_data:/data/db
     networks:
-      - time-network
+      - farm_network
 
 volumes:
-  mongo_data:
+  time_mongo_data:
 
 networks:
-  time-network:
-    driver: bridge
+  farm_network:
+    external: true
